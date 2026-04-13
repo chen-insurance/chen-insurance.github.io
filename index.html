@@ -214,6 +214,25 @@ textarea.field{min-height:72px;resize:vertical;margin-bottom:8px}
 .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--g900);color:white;font-size:12px;font-weight:500;padding:9px 18px;border-radius:99px;opacity:0;transition:opacity .25s;z-index:999;pointer-events:none;white-space:nowrap}
 .toast.show{opacity:1}
 
+/* ── AUTH SCREENS ── */
+.auth-screen{position:fixed;inset:0;background:var(--navy);display:flex;align-items:center;justify-content:center;z-index:9999}
+.auth-box{background:white;border-radius:var(--r-xl);padding:32px;width:400px;box-shadow:0 24px 64px rgba(0,0,0,.35)}
+.auth-logo{width:48px;height:48px;background:var(--teal);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px}
+.auth-logo svg{width:24px;height:24px;stroke:white;fill:none;stroke-width:2;stroke-linecap:round}
+.auth-box h2{font-size:20px;font-weight:700;color:var(--g900);margin-bottom:4px}
+.auth-box .auth-sub{font-size:12px;color:var(--g500);margin-bottom:22px}
+.auth-field{display:flex;flex-direction:column;gap:5px;margin-bottom:13px}
+.auth-field label{font-size:11px;font-weight:700;color:var(--g500);text-transform:uppercase;letter-spacing:.05em}
+.auth-field input{padding:10px 12px;font-size:14px;font-family:var(--font);border:1px solid var(--g200);border-radius:var(--r-sm);background:var(--g50);color:var(--g900);transition:border-color .15s}
+.auth-field input:focus{outline:none;border-color:var(--navy);background:white}
+.auth-btn{width:100%;padding:11px;font-size:14px;font-weight:700;font-family:var(--font);border:none;border-radius:var(--r-md);background:var(--navy);color:white;cursor:pointer;margin-top:8px;transition:background .15s}
+.auth-btn:hover:not(:disabled){background:var(--navy-mid)}
+.auth-btn:disabled{opacity:.5;cursor:not-allowed}
+.auth-err{font-size:12px;color:var(--red);margin-top:8px;display:none;padding:8px 10px;background:var(--red-light);border:1px solid var(--red-mid);border-radius:var(--r-sm)}
+.auth-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:4px 10px;border-radius:99px;background:var(--teal-light);color:var(--teal);border:1px solid var(--teal-mid);margin-bottom:18px}
+.auth-badge svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
+.auth-hint{font-size:11px;color:var(--g400);margin-top:6px;line-height:1.6}
+
 /* ── INSURER SELECT ── */
 .trow-exp{flex-direction:column;align-items:stretch;padding-bottom:10px}
 .trow-top{display:flex;align-items:center;gap:7px}
@@ -242,6 +261,57 @@ textarea.field{min-height:72px;resize:vertical;margin-bottom:8px}
 </style>
 </head>
 <body>
+
+<!-- LOGIN SCREEN -->
+<div id="auth-screen" class="auth-screen">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+    </div>
+    <div class="auth-badge">
+      <svg viewBox="0 0 24 24"><path d="M12 2L3 7v5c0 5.5 3.8 10.7 9 12 5.2-1.3 9-6.5 9-12V7L12 2z"/></svg>
+      גישה מאובטחת
+    </div>
+    <h2>ביטוח חן — כניסה</h2>
+    <p class="auth-sub">הזן את פרטי הגישה שלך להמשך</p>
+    <div class="auth-field">
+      <label>שם משתמש</label>
+      <input id="auth-user" type="text" placeholder="שם משתמש" autocomplete="username" onkeydown="if(event.key==='Enter')document.getElementById('auth-pass').focus()">
+    </div>
+    <div class="auth-field">
+      <label>סיסמא</label>
+      <input id="auth-pass" type="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div id="auth-err" class="auth-err"></div>
+    <button id="auth-btn" class="auth-btn" onclick="doLogin()">כניסה ←</button>
+  </div>
+</div>
+
+<!-- FIRST-TIME SETUP SCREEN -->
+<div id="firstsetup-screen" class="auth-screen" style="display:none">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.8-7 8-7s8 3 8 7"/></svg>
+    </div>
+    <h2>הגדרה ראשונית</h2>
+    <p class="auth-sub">בחר שם משתמש וסיסמא לכניסה למערכת. הסיסמא נשמרת בצורה מוצפנת בלבד.</p>
+    <div class="auth-field">
+      <label>שם משתמש</label>
+      <input id="fs-user" type="text" placeholder="לדוגמה: chen" autocomplete="username">
+    </div>
+    <div class="auth-field">
+      <label>סיסמא (לפחות 6 תווים)</label>
+      <input id="fs-pass" type="password" placeholder="••••••••" autocomplete="new-password">
+    </div>
+    <div class="auth-field">
+      <label>אימות סיסמא</label>
+      <input id="fs-pass2" type="password" placeholder="••••••••" autocomplete="new-password" onkeydown="if(event.key==='Enter')doFirstSetup()">
+    </div>
+    <div id="fs-err" class="auth-err"></div>
+    <button id="fs-btn" class="auth-btn" onclick="doFirstSetup()">צור חשבון ←</button>
+    <p class="auth-hint">הסיסמא מאוחסנת כ-SHA-256 hash בדפדפן שלך בלבד — לא נשלחת לשום שרת.</p>
+  </div>
+</div>
 
 <!-- SETUP SCREEN -->
 <div id="setup-screen" style="display: none;">
@@ -343,7 +413,7 @@ textarea.field{min-height:72px;resize:vertical;margin-bottom:8px}
 <div class="toast" id="toast"></div>
 
 <!-- APP SHELL -->
-<div class="app" id="app-shell" style="display: grid;">
+<div class="app" id="app-shell" style="display: none;">
   <div class="sidebar">
     <div class="brand">
       <div class="brand-logo">
@@ -366,6 +436,10 @@ textarea.field{min-height:72px;resize:vertical;margin-bottom:8px}
         <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
         לקוח חדש
       </button>
+      <button class="settings-btn" onclick="doLogout()" style="color:rgba(255,100,100,.5)">
+        <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"></path><polyline points="16 17 21 12 16 7" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"></polyline><line x1="21" y1="12" x2="9" y2="12" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"></line></svg>
+        התנתקות
+      </button>
       <button class="settings-btn" onclick="reconnect()" style="color:rgba(255,255,255,.3)">
         <svg viewBox="0 0 24 24"><path d="M21 2v6h-6" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"></path><path d="M3 12a9 9 0 0115-6.7L21 8" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"></path><path d="M3 22v-6h6" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"></path><path d="M21 12a9 9 0 01-15 6.7L3 16" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"></path></svg>
         שנה חיבור Supabase
@@ -384,6 +458,112 @@ textarea.field{min-height:72px;resize:vertical;margin-bottom:8px}
 </div>
 
 <script>
+// ══════════════════════════════════════════════════════════════════
+//  APP CONFIG — מלא פעם אחת, יפעל בכל מחשב/כרום אוטומטית
+//  supabaseUrl + supabaseKey: מהגדרות ה-Supabase שלך (Project URL + anon key)
+//  authUser:  שם המשתמש הקבוע (לא חייב — אפשר להשאיר ריק ולהגדיר בהתחברות ראשונה)
+//  authHash:  SHA-256 של הסיסמא — צור ב: https://emn178.github.io/online-tools/sha256.html
+// ══════════════════════════════════════════════════════════════════
+const CONFIG = {
+  supabaseUrl: '',   // 'https://xxxxxxxx.supabase.co'
+  supabaseKey: '',   // 'eyJhbGci...'
+  authUser:    '',   // שם משתמש קבוע (אופציונלי)
+  authHash:    ''    // SHA-256 של הסיסמא (אופציונלי)
+};
+
+// ── AUTH ──
+const SESSION_KEY='chen_ins_sess';
+const SESSION_TTL=8*60*60*1000; // 8 שעות
+
+async function sha256(msg){
+  const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(msg));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+function checkSession(){
+  try{
+    const s=JSON.parse(localStorage.getItem(SESSION_KEY)||'null');
+    if(!s||Date.now()-s.ts>SESSION_TTL){localStorage.removeItem(SESSION_KEY);return false;}
+    return true;
+  }catch{return false;}
+}
+
+function startSession(){localStorage.setItem(SESSION_KEY,JSON.stringify({ts:Date.now()}));}
+
+function doLogout(){
+  if(!confirm('להתנתק?'))return;
+  localStorage.removeItem(SESSION_KEY);
+  location.reload();
+}
+
+async function doLogin(){
+  const u=document.getElementById('auth-user').value.trim();
+  const p=document.getElementById('auth-pass').value;
+  const errEl=document.getElementById('auth-err');
+  errEl.style.display='none';
+  if(!u||!p){errEl.textContent='נא למלא שם משתמש וסיסמא';errEl.style.display='block';return;}
+  const btn=document.getElementById('auth-btn');
+  btn.disabled=true;btn.textContent='מאמת...';
+  const storedUser=CONFIG.authUser||localStorage.getItem('auth_user');
+  const storedHash=CONFIG.authHash||localStorage.getItem('auth_hash');
+  if(!storedUser||!storedHash){
+    document.getElementById('auth-screen').style.display='none';
+    document.getElementById('firstsetup-screen').style.display='flex';
+    btn.disabled=false;btn.textContent='כניסה ←';
+    return;
+  }
+  const hash=await sha256(p);
+  if(u===storedUser&&hash===storedHash){
+    startSession();
+    document.getElementById('auth-screen').style.display='none';
+    afterAuth();
+  }else{
+    errEl.textContent='שם משתמש או סיסמא שגויים';
+    errEl.style.display='block';
+    btn.disabled=false;btn.textContent='כניסה ←';
+  }
+}
+
+async function doFirstSetup(){
+  const u=document.getElementById('fs-user').value.trim();
+  const p=document.getElementById('fs-pass').value;
+  const p2=document.getElementById('fs-pass2').value;
+  const errEl=document.getElementById('fs-err');
+  errEl.style.display='none';
+  if(!u){errEl.textContent='נא להזין שם משתמש';errEl.style.display='block';return;}
+  if(p.length<6){errEl.textContent='הסיסמא חייבת להכיל לפחות 6 תווים';errEl.style.display='block';return;}
+  if(p!==p2){errEl.textContent='הסיסמאות לא תואמות';errEl.style.display='block';return;}
+  const btn=document.getElementById('fs-btn');
+  btn.disabled=true;btn.textContent='שומר...';
+  const hash=await sha256(p);
+  localStorage.setItem('auth_user',u);
+  localStorage.setItem('auth_hash',hash);
+  startSession();
+  document.getElementById('firstsetup-screen').style.display='none';
+  afterAuth();
+}
+
+function afterAuth(){
+  const url=CONFIG.supabaseUrl||localStorage.getItem('sb_url');
+  const key=CONFIG.supabaseKey||localStorage.getItem('sb_key');
+  if(url&&key){
+    SB_URL=url;SB_KEY=key;
+    if(!localStorage.getItem('sb_url'))localStorage.setItem('sb_url',url);
+    if(!localStorage.getItem('sb_key'))localStorage.setItem('sb_key',key);
+    document.getElementById('setup-screen').style.display='none';
+    document.getElementById('loading-screen').style.display='flex';
+    loadAll().catch(()=>{
+      SB_URL='';SB_KEY='';
+      document.getElementById('loading-screen').style.display='none';
+      document.getElementById('setup-screen').style.display='flex';
+      document.getElementById('setup-err').style.display='block';
+      document.getElementById('setup-err').textContent='החיבור נכשל — בדוק את פרטי Supabase.';
+    });
+  }else{
+    document.getElementById('setup-screen').style.display='flex';
+  }
+}
+
 // ── DEFAULTS ──
 const DEFAULT_OPTS={
   marital:['נשוי/נשואה','רווק/רווקה','גרוש/גרושה','אלמן/אלמנה'],
@@ -450,6 +630,7 @@ async function connectSupabase(){
     localStorage.setItem('sb_key',key);
     document.getElementById('setup-screen').style.display='none';
     await loadAll();
+    document.getElementById('app-shell').style.display='grid';
   }catch(e){
     SB_URL='';SB_KEY='';
     showSetupErr('לא הצלחנו להתחבר. בדקי שה-URL והמפתח נכונים.');
@@ -963,23 +1144,19 @@ function toast(msg){
 }
 
 // ── INIT ──
-const savedUrl=localStorage.getItem('sb_url');
-const savedKey=localStorage.getItem('sb_key');
-if(savedUrl&&savedKey){
-  SB_URL=savedUrl;SB_KEY=savedKey;
-  document.getElementById('setup-screen').style.display='none';
-  document.getElementById('loading-screen').style.display='flex';
-  loadAll().catch(()=>{
-    SB_URL='';SB_KEY='';
-    localStorage.removeItem('sb_url');
-    localStorage.removeItem('sb_key');
-    document.getElementById('loading-screen').style.display='none';
-    document.getElementById('setup-screen').style.display='flex';
-    document.getElementById('setup-err').style.display='block';
-    document.getElementById('setup-err').textContent='החיבור הקודם נכשל — נא להזין מחדש את הפרטים.';
-    document.getElementById('sb-url').value=savedUrl;
-  });
-}
+(function initApp(){
+  const storedUser=CONFIG.authUser||localStorage.getItem('auth_user');
+  const storedHash=CONFIG.authHash||localStorage.getItem('auth_hash');
+  if(checkSession()){
+    document.getElementById('auth-screen').style.display='none';
+    afterAuth();
+  }else if(!storedUser||!storedHash){
+    // No credentials exist yet — go straight to first-time setup
+    document.getElementById('auth-screen').style.display='none';
+    document.getElementById('firstsetup-screen').style.display='flex';
+  }
+  // else: auth-screen is shown (default), user must log in
+})();
 
 function reconnect(){
   localStorage.removeItem('sb_url');
