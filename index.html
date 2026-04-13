@@ -81,6 +81,18 @@ body{font-family:var(--font);background:var(--g100);color:var(--g900);font-size:
 .ci-pbar{flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,.12);overflow:hidden}
 .ci-pfill{height:100%;border-radius:2px;background:linear-gradient(to left,var(--teal),#185fa5);transition:width .4s ease}
 .ci-ppct{font-size:9px;font-weight:700;color:rgba(255,255,255,.45);flex-shrink:0;min-width:22px;text-align:left}
+.sb-stats{padding:7px 14px 6px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between}
+.sb-stat-box{text-align:center;flex:1}
+.sb-stat-val{font-size:13px;font-weight:700;color:rgba(255,255,255,.8);display:block}
+.sb-stat-lbl{font-size:8px;color:rgba(255,255,255,.28);text-transform:uppercase;letter-spacing:.06em}
+.sb-sort{padding:5px 9px 3px;display:flex;gap:3px;border-bottom:1px solid rgba(255,255,255,.06)}
+.sb-sortbtn{flex:1;font-size:8.5px;font-weight:700;font-family:var(--font);border-radius:4px;padding:3px 4px;border:1px solid rgba(255,255,255,.1);background:transparent;color:rgba(255,255,255,.28);cursor:pointer;transition:all .15s;white-space:nowrap}
+.sb-sortbtn.on{background:rgba(255,255,255,.1);color:rgba(255,255,255,.75);border-color:rgba(255,255,255,.22)}
+.ci-fu{font-size:8px;font-weight:700;color:#f59e0b;background:rgba(245,158,11,.13);border:1px solid rgba(245,158,11,.28);border-radius:99px;padding:1px 5px;white-space:nowrap}
+.ci-lv{font-size:8.5px;color:rgba(255,255,255,.2);margin-top:2px;display:block}
+.tb-print-btn{display:flex;align-items:center;gap:5px;padding:5px 11px;font-size:11px;font-weight:600;font-family:var(--font);border-radius:var(--r-sm);border:1px solid var(--g200);background:white;color:var(--g600);cursor:pointer;transition:all .15s;white-space:nowrap}
+.tb-print-btn:hover{background:var(--g100);border-color:var(--g300)}
+.tb-print-btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
 .sb-bottom{padding:8px;display:flex;flex-direction:column;gap:5px;border-top:1px solid rgba(255,255,255,.07)}
 .add-btn{padding:9px 12px;font-size:12px;font-family:var(--font);border:1px dashed rgba(255,255,255,.18);border-radius:var(--r-sm);background:transparent;color:rgba(255,255,255,.42);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .2s;width:100%}
 .add-btn:hover{border-color:rgba(255,255,255,.38);color:white}
@@ -445,7 +457,9 @@ textarea.field{min-height:72px;resize:vertical;margin-bottom:8px}
         <span id="sync-txt">שומר</span>
       </div>
     </div>
+    <div id="sb-stats" class="sb-stats"></div>
     <div class="sb-search"><input placeholder="חיפוש לקוח..." oninput="filterC(this.value)"></div>
+    <div id="sb-sort" class="sb-sort"></div>
     <div class="sb-lbl">לקוחות</div>
     <div class="clist" id="clist"></div>
     <div class="sb-bottom">
@@ -460,6 +474,10 @@ textarea.field{min-height:72px;resize:vertical;margin-bottom:8px}
       <button class="settings-btn" onclick="reconnect()" style="color:rgba(255,255,255,.3)">
         <svg viewBox="0 0 24 24"><path d="M21 2v6h-6" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"></path><path d="M3 12a9 9 0 0115-6.7L21 8" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"></path><path d="M3 22v-6h6" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"></path><path d="M21 12a9 9 0 01-15 6.7L3 16" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"></path></svg>
         שנה חיבור Supabase
+      </button>
+      <button class="settings-btn" onclick="exportJSON()">
+        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"></path><polyline points="7 10 12 15 17 10" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"></polyline><line x1="12" y1="15" x2="12" y2="3" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"></line></svg>
+        גיבוי JSON
       </button>
       <button class="settings-btn" onclick="openSettings()">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"></path></svg>
@@ -609,7 +627,7 @@ const DEFAULT_TOPICS=[
 // ── STATE ──
 let SB_URL='', SB_KEY='';
 let clients=[], TOPICS=JSON.parse(JSON.stringify(DEFAULT_TOPICS)), opts=JSON.parse(JSON.stringify(DEFAULT_OPTS));
-let aid=null, openT={t1:true,t2:false,t3:false}, fq='', editId=null, nid=100;
+let aid=null, openT={t1:true,t2:false,t3:false}, fq='', editId=null, nid=100, sbSort='followup';
 const COLORS=['#1a3a6b','#0a7a68','#7b3fa8','#b85800','#1a6b3a','#a82626'];
 const col=id=>COLORS[((id||1)-1)%COLORS.length];
 const ini=c=>(c.fn[0]+c.ln[0]).toUpperCase();
@@ -734,33 +752,67 @@ async function syncSettings(){
 // ── RENDER SIDEBAR ──
 function renderSb(){
   const q=fq.toLowerCase();
-  document.getElementById('clist').innerHTML=clients
-    .filter(c=>(c.fn+' '+c.ln).toLowerCase().includes(q))
-    .map(c=>{
-      const p=prog(c);
-      const r=15,circ=2*Math.PI*r;
-      const filled=(circ*(p/100)).toFixed(1);
-      const ringColor=p>=80?'#22c99e':p>=40?'#f59e0b':'rgba(255,255,255,0.25)';
-      return`<div class="ci${c.id===aid?' active':''}" onclick="sel(${c.id})">
-        <div class="av-ring">
-          <svg width="34" height="34" viewBox="0 0 34 34">
-            <circle cx="17" cy="17" r="${r}" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2"/>
-            <circle cx="17" cy="17" r="${r}" fill="none" stroke="${ringColor}" stroke-width="2"
-              stroke-dasharray="${filled} ${circ.toFixed(1)}" stroke-linecap="round"/>
-          </svg>
-          <div class="av-sm" style="background:${col(c.id)}">${ini(c)}</div>
+  let list=clients.filter(c=>(c.fn+' '+c.ln).toLowerCase().includes(q));
+  if(sbSort==='name') list.sort((a,b)=>(a.fn+a.ln).localeCompare(b.fn+b.ln,'he'));
+  else if(sbSort==='progress') list.sort((a,b)=>prog(a)-prog(b));
+  else if(sbSort==='followup') list.sort((a,b)=>((b.next&&b.next.trim()?1:0)-(a.next&&a.next.trim()?1:0)));
+
+  // Stats
+  const total=clients.length;
+  const avgP=total?Math.round(clients.reduce((s,c)=>s+prog(c),0)/total):0;
+  const fuCnt=clients.filter(c=>c.next&&c.next.trim()).length;
+  document.getElementById('sb-stats').innerHTML=`
+    <div class="sb-stat-box"><span class="sb-stat-val">${total}</span><span class="sb-stat-lbl">לקוחות</span></div>
+    <div class="sb-stat-box"><span class="sb-stat-val">${avgP}%</span><span class="sb-stat-lbl">ממוצע</span></div>
+    <div class="sb-stat-box"><span class="sb-stat-val"${fuCnt?' style="color:#f59e0b"':''}>${fuCnt}</span><span class="sb-stat-lbl">לטיפול</span></div>`;
+
+  // Sort buttons
+  const sorts=[['followup','לטיפול ראשון'],['progress','לפי %'],['name','לפי שם']];
+  document.getElementById('sb-sort').innerHTML=sorts.map(([k,l])=>
+    `<button class="sb-sortbtn${sbSort===k?' on':''}" onclick="setSbSort('${k}')">${l}</button>`).join('');
+
+  // Client list
+  document.getElementById('clist').innerHTML=list.map(c=>{
+    const p=prog(c);
+    const r=15,circ=2*Math.PI*r;
+    const filled=(circ*(p/100)).toFixed(1);
+    const ringColor=p>=80?'#22c99e':p>=40?'#f59e0b':'rgba(255,255,255,0.25)';
+    const hasFu=c.next&&c.next.trim();
+    const fuTag=hasFu?`<span class="ci-fu">📌 לטיפול</span>`:'';
+    const lvTag=c.lastVisit&&c.id!==aid?`<span class="ci-lv">נפגשנו: ${c.lastVisit}</span>`:'';
+    return`<div class="ci${c.id===aid?' active':''}" onclick="sel(${c.id})">
+      <div class="av-ring">
+        <svg width="34" height="34" viewBox="0 0 34 34">
+          <circle cx="17" cy="17" r="${r}" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2"/>
+          <circle cx="17" cy="17" r="${r}" fill="none" stroke="${ringColor}" stroke-width="2"
+            stroke-dasharray="${filled} ${circ.toFixed(1)}" stroke-linecap="round"/>
+        </svg>
+        <div class="av-sm" style="background:${col(c.id)}">${ini(c)}</div>
+      </div>
+      <div style="overflow:hidden;flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap">
+          <span class="ci-name">${c.fn} ${c.ln}</span>${fuTag}
         </div>
-        <div style="overflow:hidden;flex:1;min-width:0">
-          <div class="ci-name">${c.fn} ${c.ln}</div>
-          <div class="ci-meta">${c.age} · ${c.st}</div>
-          <div class="ci-prog-wrap">
-            <div class="ci-pbar"><div class="ci-pfill" style="width:${p}%"></div></div>
-            <span class="ci-ppct">${p}%</span>
-          </div>
+        <div class="ci-meta">${c.age} · ${c.st}</div>
+        ${lvTag}
+        <div class="ci-prog-wrap">
+          <div class="ci-pbar"><div class="ci-pfill" style="width:${p}%"></div></div>
+          <span class="ci-ppct">${p}%</span>
         </div>
-      </div>`}).join('');
+      </div>
+    </div>`;
+  }).join('');
 }
-function sel(id){aid=id;renderSb();renderMain();}
+function setSbSort(k){sbSort=k;renderSb();}
+function sel(id){
+  aid=id;
+  const c=clients.find(x=>x.id===id);
+  if(c){
+    c.lastVisit=new Date().toLocaleDateString('he-IL',{day:'2-digit',month:'2-digit'});
+    scheduleSync(c);
+  }
+  renderSb();renderMain();
+}
 function filterC(q){fq=q;renderSb();}
 
 // ── PROGRESS ──
@@ -801,6 +853,10 @@ function renderMain(){
       <button class="tb-edit-btn" onclick="openEditModal(${c.id})">
         <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
         ערוך
+      </button>
+      <button class="tb-print-btn" onclick="printClient()">
+        <svg viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        הדפסה
       </button>
       <button class="tb-del-btn" onclick="delClient(${c.id})">
         <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
@@ -872,7 +928,7 @@ function renderMain(){
     <div class="note-item">
       <button class="note-del" onclick="delNote(${i})">×</button>
       <div class="note-text">${n.text}</div>
-      <div class="note-time">${n.time}</div>
+      <div class="note-time">${n.date?n.date+' · '+n.time:n.time}</div>
     </div>`).join('');
 
   mc.innerHTML=`<div class="content">
@@ -982,8 +1038,10 @@ function addNote(){
   const c=clients.find(x=>x.id===aid),ni=document.getElementById('ni');
   if(!c||!ni.value.trim())return;
   c.notes=c.notes||[];
-  const t=new Date().toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'});
-  c.notes.unshift({text:ni.value.trim(),time:t});
+  const _now=new Date();
+  const t=_now.toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'});
+  const d=_now.toLocaleDateString('he-IL',{day:'2-digit',month:'2-digit'});
+  c.notes.unshift({text:ni.value.trim(),time:t,date:d});
   ni.value='';renderMain();scheduleSync(c);
 }
 function delNote(i){
@@ -1146,6 +1204,70 @@ async function saveSettings(){
   await syncSettings();
   closeSettings();renderSb();renderMain();
   toast('הגדרות נשמרו');
+}
+
+// ── PRINT ──
+function printClient(){
+  const c=clients.find(x=>x.id===aid);if(!c)return;
+  const p=prog(c);
+  const today=new Date().toLocaleDateString('he-IL',{day:'2-digit',month:'2-digit',year:'numeric'});
+  const stLabel=s=>s==='yes'?'✓ קיים':s==='w'?'⚑ לבדוק':s==='n'?'✕ אין':'—';
+  const topicsHtml=TOPICS.map(tier=>{
+    const rows=tier.items.map(item=>{
+      const st=(c.checks||{})[item.id]||'none';
+      const ins=(c.insurers||{})[item.id]||'';
+      return`<tr><td>${item.name}</td><td>${stLabel(st)}</td><td>${ins&&ins!=='— בחר חברה —'?ins:''}</td></tr>`;
+    }).join('');
+    return`<h3 style="margin:14px 0 5px;color:#0f2044">${tier.n}. ${tier.lbl}</h3>
+      <table border="1" cellpadding="6" cellspacing="0" width="100%" style="border-collapse:collapse;font-size:13px;border-color:#ddd">${rows}</table>`;
+  }).join('');
+  const notesHtml=(c.notes||[]).length
+    ?`<h2 style="color:#0a7a68;margin:18px 0 8px">הערות</h2>`
+     +(c.notes.map(n=>`<div style="margin-bottom:8px;padding:7px 10px;background:#f0f4fc;border-radius:4px;font-size:13px"><strong>${n.date?n.date+' · ':'' }${n.time}</strong> — ${n.text}</div>`).join(''))
+    :'';
+  const nextHtml=c.next?`<div style="margin:14px 0;padding:8px 12px;background:#fff4e6;border:1px solid #ffc680;border-radius:5px;font-size:13px"><strong>📌 פתוח לפגישה הבאה:</strong> ${c.next}</div>`:'';
+  const html=`<!DOCTYPE html><html lang="he" dir="rtl"><head><meta charset="UTF-8">
+    <title>${c.fn} ${c.ln} — ביטוח חן</title>
+    <style>*{box-sizing:border-box}body{font-family:Arial,sans-serif;margin:30px 36px;color:#222;direction:rtl}
+    h1{color:#0f2044;margin-bottom:3px}h2{color:#0a7a68;margin:18px 0 8px}
+    .meta{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 16px}
+    .mc{padding:5px 10px;background:#f0f4fc;border-radius:4px;font-size:12px}
+    .prog{display:inline-block;padding:5px 12px;background:#e2f5f1;border:1px solid #9dd9ce;border-radius:4px;font-weight:700;color:#0f2044;margin-bottom:10px}
+    tr:nth-child(even){background:#f9f9f7}td{padding:5px 8px}
+    @media print{@page{margin:15mm}}</style>
+  </head><body>
+    <h1>${c.fn} ${c.ln}</h1>
+    <div style="font-size:12px;color:#888;margin-bottom:10px">ביטוח חן · פגישה: ${today}</div>
+    <div class="meta">
+      <div class="mc">גיל: ${c.age}</div>
+      <div class="mc">מקצוע: ${c.job}</div>
+      <div class="mc">סטטוס: ${c.st}</div>
+      <div class="mc">תעסוקה: ${c.emp}</div>
+      ${c.inc?`<div class="mc">הכנסה: ₪${Number(c.inc).toLocaleString()}</div>`:''}
+      ${c.mort==='כן'?`<div class="mc">משכנתא: ₪${Number(c.ma||0).toLocaleString()}</div>`:''}
+      ${(c.ch||[]).length?`<div class="mc">ילדים: ${c.ch.join(', ')}</div>`:''}
+    </div>
+    <div class="prog">התקדמות פגישה: ${p}%</div>
+    <h2>מהלך הפגישה</h2>
+    ${topicsHtml}
+    ${nextHtml}
+    ${notesHtml}
+  </body></html>`;
+  const w=window.open('','_blank','width=900,height=750');
+  w.document.write(html);w.document.close();w.focus();
+  setTimeout(()=>w.print(),600);
+}
+
+// ── EXPORT JSON ──
+function exportJSON(){
+  const data=clients.map(({_sid,...rest})=>rest);
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download=`chen-backup-${new Date().toISOString().slice(0,10)}.json`;
+  document.body.appendChild(a);a.click();
+  setTimeout(()=>{document.body.removeChild(a);URL.revokeObjectURL(url);},100);
+  toast('גיבוי הורד בהצלחה');
 }
 
 // ── ISRAELI INSURERS ──
