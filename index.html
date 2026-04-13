@@ -213,6 +213,32 @@ textarea.field{min-height:72px;resize:vertical;margin-bottom:8px}
 .tier-edit-title input:focus{outline:none;border-color:var(--g400)}
 .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--g900);color:white;font-size:12px;font-weight:500;padding:9px 18px;border-radius:99px;opacity:0;transition:opacity .25s;z-index:999;pointer-events:none;white-space:nowrap}
 .toast.show{opacity:1}
+
+/* ── INSURER SELECT ── */
+.trow-exp{flex-direction:column;align-items:stretch;padding-bottom:10px}
+.trow-top{display:flex;align-items:center;gap:7px}
+.insurer-row{display:flex;align-items:center;gap:7px;margin-top:7px;padding-top:7px;border-top:1px dashed var(--g200)}
+.insurer-lbl{font-size:10px;font-weight:700;color:var(--g500);white-space:nowrap}
+.insurer-sel{flex:1;padding:5px 8px;font-size:12px;font-family:var(--font);border:1px solid var(--g200);border-radius:var(--r-sm);background:white;color:var(--g900)}
+.insurer-sel:focus{outline:none;border-color:var(--teal)}
+.insurer-badge{font-size:11px;font-weight:600;color:var(--teal);background:var(--teal-light);border:1px solid var(--teal-mid);border-radius:99px;padding:2px 9px;white-space:nowrap;display:inline-block}
+
+/* ── COMPOUND CALC ── */
+.calc-wrap{background:linear-gradient(135deg,#edfaf7 0%,#f0f4fc 100%);border:1px solid var(--teal-mid);border-radius:var(--r-lg);padding:14px 16px;margin-top:4px;margin-bottom:14px}
+.calc-hdr{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:var(--teal);margin-bottom:12px}
+.calc-hdr svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
+.calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.calc-field{display:flex;flex-direction:column;gap:3px}
+.calc-field label{font-size:10px;font-weight:700;color:var(--g500);text-transform:uppercase;letter-spacing:.04em}
+.calc-field input{padding:7px 9px;font-size:13px;font-family:var(--font);border:1px solid var(--teal-mid);border-radius:var(--r-sm);background:white;color:var(--g900);transition:border-color .15s}
+.calc-field input:focus{outline:none;border-color:var(--teal)}
+.calc-result{background:white;border:1px solid var(--teal-mid);border-radius:var(--r-md);padding:12px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center}
+.cr-lbl{font-size:10px;color:var(--g500);margin-bottom:3px;display:block}
+.cr-val{font-size:15px;font-weight:700;color:var(--navy);display:block}
+.cr-val.profit{color:var(--teal)}
+.calc-slider-wrap{margin-bottom:10px}
+.calc-slider-wrap label{font-size:10px;font-weight:700;color:var(--g500);text-transform:uppercase;letter-spacing:.04em;display:flex;justify-content:space-between;margin-bottom:4px}
+.calc-slider-wrap input[type=range]{width:100%;accent-color:var(--teal)}
 </style>
 </head>
 <body>
@@ -592,6 +618,28 @@ function renderMain(){
       </div>
       ${openT[tier.id]?`<div class="tier-body slide">${tier.items.map(item=>{
         const st=(c.checks||{})[item.id]||'none';
+        const ins=(c.insurers||{})[item.id]||'';
+        const insurerRow=st==='yes'?`
+          <div class="insurer-row">
+            <span class="insurer-lbl">חברה קיימת:</span>
+            <select class="insurer-sel" onchange="setInsurer('${item.id}',this.value)">
+              ${ISRAELI_INSURERS.map(co=>`<option value="${co}"${ins===co?' selected':''}>${co}</option>`).join('')}
+            </select>
+            ${ins&&ins!=='— בחר חברה —'?`<span class="insurer-badge">${ins}</span>`:''}
+          </div>`:'';
+        if(st==='yes'){
+          return`<div class="trow trow-exp">
+            <div class="trow-top">
+              <span class="tname">${item.name}</span>
+              <div class="stbts">
+                <button class="stb y" onclick="setC('${item.id}','yes')">✓ קיים</button>
+                <button class="stb${st==='w'?' w':''}" onclick="setC('${item.id}','w')">⚑ לבדוק</button>
+                <button class="stb${st==='n'?' n':''}" onclick="setC('${item.id}','n')">✕ אין</button>
+              </div>
+            </div>
+            ${insurerRow}
+          </div>`;
+        }
         return`<div class="trow">
           <span class="tname">${item.name}</span>
           <div class="stbts">
@@ -599,7 +647,8 @@ function renderMain(){
             <button class="stb${st==='w'?' w':''}" onclick="setC('${item.id}','w')">⚑ לבדוק</button>
             <button class="stb${st==='n'?' n':''}" onclick="setC('${item.id}','n')">✕ אין</button>
           </div>
-        </div>`}).join('')}</div>`:''}
+        </div>`;
+      }).join('')}</div>`:''}
     </div>`).join('');
 
   const notesHtml=(c.notes||[]).map((n,i)=>`
@@ -632,6 +681,37 @@ function renderMain(){
       <div class="pmeta">
         <span style="font-size:10px;color:var(--g500)">התקדמות הפגישה</span>
         <span style="font-size:10px;font-weight:700;color:var(--navy)">${p}%</span>
+      </div>
+
+      <div class="sec" style="margin-top:20px">מחשבון ריבית דה-ריבית</div>
+      <div class="calc-wrap">
+        <div class="calc-hdr">
+          <svg viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+          פוטנציאל ההשקעה של הלקוח
+        </div>
+        <div class="calc-grid">
+          <div class="calc-field">
+            <label>סכום התחלתי (₪)</label>
+            <input id="cc-init" type="number" placeholder="50,000" min="0" oninput="calcCompound()">
+          </div>
+          <div class="calc-field">
+            <label>הפקדה חודשית (₪)</label>
+            <input id="cc-monthly" type="number" placeholder="1,000" min="0" oninput="calcCompound()">
+          </div>
+          <div class="calc-field">
+            <label>ריבית שנתית (%)</label>
+            <input id="cc-rate" type="number" placeholder="7" min="0" max="30" step="0.1" oninput="calcCompound()">
+          </div>
+          <div class="calc-field">
+            <label>מספר שנים</label>
+            <input id="cc-years" type="number" placeholder="20" min="1" max="50" oninput="calcCompound()">
+          </div>
+        </div>
+        <div class="calc-result" id="calc-result-box">
+          <div><span class="cr-lbl">סה"כ הושקע</span><span class="cr-val" id="cc-invested">—</span></div>
+          <div><span class="cr-lbl">סכום סופי</span><span class="cr-val" id="cc-total">—</span></div>
+          <div><span class="cr-lbl">רווח נטו</span><span class="cr-val profit" id="cc-profit">—</span></div>
+        </div>
       </div>
     </div>
     <div class="rp">
@@ -833,6 +913,44 @@ async function saveSettings(){
   await syncSettings();
   closeSettings();renderSb();renderMain();
   toast('הגדרות נשמרו');
+}
+
+// ── ISRAELI INSURERS ──
+const ISRAELI_INSURERS=[
+  '— בחר חברה —',
+  'כלל ביטוח','מנורה מבטחים','הפניקס','הראל ביטוח','מגדל ביטוח',
+  'איילון','הכשרה ביטוח','ביטוח ישיר','שירביט','AIG ישראל',
+  'מיטב','ילין לפידות','פסגות','אנליסט','הפועלים','לאומי','אחר'
+];
+
+function setInsurer(iid,val){
+  const c=clients.find(x=>x.id===aid);if(!c)return;
+  if(!c.insurers)c.insurers={};
+  c.insurers[iid]=val;
+  scheduleSync(c);
+  renderMain();
+}
+
+function calcCompound(){
+  const init=parseFloat(document.getElementById('cc-init').value)||0;
+  const monthly=parseFloat(document.getElementById('cc-monthly').value)||0;
+  const rate=parseFloat(document.getElementById('cc-rate').value)||0;
+  const years=parseFloat(document.getElementById('cc-years').value)||0;
+  if(!years&&!init&&!monthly){return;}
+  const n=years*12;
+  const r=rate/100/12;
+  let total=init*Math.pow(1+r,n);
+  if(r>0){
+    total+=monthly*((Math.pow(1+r,n)-1)/r);
+  }else{
+    total+=monthly*n;
+  }
+  const invested=init+monthly*n;
+  const profit=total-invested;
+  const fmt=v=>'₪'+Math.round(v).toLocaleString('he-IL');
+  document.getElementById('cc-invested').textContent=fmt(invested);
+  document.getElementById('cc-total').textContent=fmt(total);
+  document.getElementById('cc-profit').textContent=fmt(profit);
 }
 
 // ── TOAST ──
