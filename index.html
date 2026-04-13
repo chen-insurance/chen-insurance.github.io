@@ -72,8 +72,15 @@ body{font-family:var(--font);background:var(--g100);color:var(--g900);font-size:
 .ci:hover{background:rgba(255,255,255,.07)}
 .ci.active{background:rgba(255,255,255,.13);border-color:rgba(255,255,255,.15)}
 .av-sm{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;flex-shrink:0}
+.av-ring{position:relative;flex-shrink:0;width:34px;height:34px}
+.av-ring .av-sm{position:absolute;top:2px;left:2px;width:30px;height:30px}
+.av-ring svg{position:absolute;top:0;left:0;transform:rotate(-90deg)}
 .ci-name{font-size:12.5px;font-weight:500;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ci-meta{font-size:10px;color:rgba(255,255,255,.33);margin-top:1px}
+.ci-prog-wrap{display:flex;align-items:center;gap:5px;margin-top:4px}
+.ci-pbar{flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,.12);overflow:hidden}
+.ci-pfill{height:100%;border-radius:2px;background:linear-gradient(to left,var(--teal),#185fa5);transition:width .4s ease}
+.ci-ppct{font-size:9px;font-weight:700;color:rgba(255,255,255,.45);flex-shrink:0;min-width:22px;text-align:left}
 .sb-bottom{padding:8px;display:flex;flex-direction:column;gap:5px;border-top:1px solid rgba(255,255,255,.07)}
 .add-btn{padding:9px 12px;font-size:12px;font-family:var(--font);border:1px dashed rgba(255,255,255,.18);border-radius:var(--r-sm);background:transparent;color:rgba(255,255,255,.42);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .2s;width:100%}
 .add-btn:hover{border-color:rgba(255,255,255,.38);color:white}
@@ -729,10 +736,29 @@ function renderSb(){
   const q=fq.toLowerCase();
   document.getElementById('clist').innerHTML=clients
     .filter(c=>(c.fn+' '+c.ln).toLowerCase().includes(q))
-    .map(c=>`<div class="ci${c.id===aid?' active':''}" onclick="sel(${c.id})">
-      <div class="av-sm" style="background:${col(c.id)}">${ini(c)}</div>
-      <div style="overflow:hidden"><div class="ci-name">${c.fn} ${c.ln}</div><div class="ci-meta">${c.age} · ${c.st}</div></div>
-    </div>`).join('');
+    .map(c=>{
+      const p=prog(c);
+      const r=15,circ=2*Math.PI*r;
+      const filled=(circ*(p/100)).toFixed(1);
+      const ringColor=p>=80?'#22c99e':p>=40?'#f59e0b':'rgba(255,255,255,0.25)';
+      return`<div class="ci${c.id===aid?' active':''}" onclick="sel(${c.id})">
+        <div class="av-ring">
+          <svg width="34" height="34" viewBox="0 0 34 34">
+            <circle cx="17" cy="17" r="${r}" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2"/>
+            <circle cx="17" cy="17" r="${r}" fill="none" stroke="${ringColor}" stroke-width="2"
+              stroke-dasharray="${filled} ${circ.toFixed(1)}" stroke-linecap="round"/>
+          </svg>
+          <div class="av-sm" style="background:${col(c.id)}">${ini(c)}</div>
+        </div>
+        <div style="overflow:hidden;flex:1;min-width:0">
+          <div class="ci-name">${c.fn} ${c.ln}</div>
+          <div class="ci-meta">${c.age} · ${c.st}</div>
+          <div class="ci-prog-wrap">
+            <div class="ci-pbar"><div class="ci-pfill" style="width:${p}%"></div></div>
+            <span class="ci-ppct">${p}%</span>
+          </div>
+        </div>
+      </div>`}).join('');
 }
 function sel(id){aid=id;renderSb();renderMain();}
 function filterC(q){fq=q;renderSb();}
