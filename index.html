@@ -834,6 +834,8 @@ function badge(c,tier){
 function renderMain(){
   const c=clients.find(x=>x.id===aid);
   const tb=document.getElementById('topbar'),mc=document.getElementById('mc');
+  const _lp=mc.querySelector('.lp'),_rp=mc.querySelector('.rp');
+  const _lpScroll=_lp?_lp.scrollTop:0,_rpScroll=_rp?_rp.scrollTop:0;
   if(!c){
     tb.innerHTML=`<div style="width:42px;height:42px;border-radius:50%;background:var(--g150)"></div>
       <div class="tb-info"><div class="tb-name" style="color:var(--g400);font-weight:400;font-size:14px">בחר לקוח מהרשימה</div></div>`;
@@ -1017,6 +1019,11 @@ function renderMain(){
       ${notesHtml}
     </div>
   </div>`;
+  requestAnimationFrame(()=>{
+    const lp=mc.querySelector('.lp'),rp=mc.querySelector('.rp');
+    if(lp)lp.scrollTop=_lpScroll;
+    if(rp)rp.scrollTop=_rpScroll;
+  });
 }
 
 // ── ACTIONS ──
